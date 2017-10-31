@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ArrayOfUserModel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <UserModel>
+    <UserName>abc</UserName>
+    <PassWord>abc</PassWord>
+    <AccountSecretKey>1e280b6333</AccountSecretKey>
+  </UserModel>
+  <UserModel>
+    <UserName>zzh</UserName>
+    <PassWord>zzh</PassWord>
+    <AccountSecretKey>508dd381b9</AccountSecretKey>
+  </UserModel>
+</ArrayOfUserModel>

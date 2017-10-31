@@ -1,0 +1,218 @@
+﻿<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>注册</title>
+
+    <link rel="icon" type="image/png" sizes="16x16" href="~/Content/img/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="~/Content/img/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="~/Content/img/favicon-96x96.png">
+
+    <link rel="stylesheet" href="~/Content/lib/ionicons.css">
+    <link rel="stylesheet" href="~/Content/lib/angular-toastr.css">
+    <link rel="stylesheet" href="~/Content/lib/animate.css">
+    <link rel="stylesheet" href="~/Content/lib/bootstrap.css">
+    <link rel="stylesheet" href="~/Content/lib/bootstrap-select.css">
+    <link rel="stylesheet" href="~/Content/lib/bootstrap-switch.css">
+    <link rel="stylesheet" href="~/Content/lib/bootstrap-tagsinput.css">
+    <link rel="stylesheet" href="~/Content/lib/font-awesome.css">
+    <link rel="stylesheet" href="~/Content/lib/fullcalendar.css">
+    <link rel="stylesheet" href="~/Content/lib/leaflet.css">
+    <link rel="stylesheet" href="~/Content/lib/angular-progress-button-styles.min.css">
+    <link rel="stylesheet" href="~/Content/lib/chartist.min.css">
+    <link rel="stylesheet" href="~/Content/lib/morris.css">
+    <link rel="stylesheet" href="~/Content/lib/ion.rangeSlider.css">
+    <link rel="stylesheet" href="~/Content/lib/ion.rangeSlider.skinFlat.css">
+    <link rel="stylesheet" href="~/Content/lib/textAngular.css">
+    <link rel="stylesheet" href="~/Content/lib/xeditable.css">
+    <link rel="stylesheet" href="~/Content/lib/style.css">
+    <link rel="stylesheet" href="~/Content/lib/select.css">
+    <link href="~/Content/lib/auth.css" rel="stylesheet" />
+    <link href="~/Content/css/toastr.min.css" rel="stylesheet" />
+
+    <script src="~/Content/lib/jquery.js"></script>
+    <script src="~/Content/js/toastr.min.js"></script>
+    <script src="~/Content/js/qrcode.min.js"></script>
+</head>
+<body>
+    <main class="auth-main">
+        <input type="hidden" id="accountSecretKey" value="" />
+        <div class="auth-block">
+            <h1>注册</h1>
+            <a href="/Home/Index" class="auth-link">已经有账号了？登录！</a>
+
+            <form class="form-horizontal">
+                <div class="form-group">
+                    <label for="inputName3"  class="col-sm-2 control-label">账号</label>
+
+                    <div class="col-sm-10">
+                        <input type="text" id="Account" class="form-control"  placeholder="请输入账号">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="inputEmail3" class="col-sm-2 control-label">密码</label>
+
+                    <div class="col-sm-10">
+                        <input type="password" class="form-control" id="passWord" placeholder="请输入密码">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="inputPassword3" class="col-sm-2 control-label">确认密码</label>
+
+                    <div class="col-sm-10">
+                        <input type="password" class="form-control" id="passWord1" placeholder="重复输入密码">
+                    </div>
+                </div>
+                <div class="form-group hidden" id="hiddenCode">
+                    <div class="col-sm-12 text-justify">
+                        <label for="bindCode" id="manualEntryKey" class="col-sm-6 control-label"></label>
+                        <div class="col-sm-6" style="background-color:#ffffff">
+                            <div id="qrcode" style="margin:10px 0 10px 0"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="inputPassword3" class="col-sm-2 control-label">动态密码</label>
+
+                    <div class="col-sm-7">
+                        <input type="text" class="form-control" id="inputCode" placeholder="点击获取密钥，输入动态密码">
+                    </div>
+
+                    <div class="col-sm-2">
+                        <button type="button" id="btnManualEntryKey" class="btn btn-default btn-auth" onclick="getManualEntryKey()">获取密钥</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-10">
+                        <button type="button" class="btn btn-default btn-auth" onclick="register()">注册</button>
+                    </div>
+                </div>
+            </form>
+
+            <div class="auth-sep"></div>
+
+        </div>
+    </main>
+</body>
+</html>
+<script>
+    //初始化二维码
+    var qrcode = new QRCode(document.getElementById("qrcode"), {
+        width: 205,
+        height: 200,
+        background: "#ffffff",
+        foreground: "#000000",
+        typeNumber: -1,
+        correctLevel: 0
+    });
+    //获取密钥
+    function getManualEntryKey() {
+        var account = $("#Account").val();
+        if (account=="") {
+           toastr.warning('请输入您的账号', '字段有误', {
+                "autoDismiss":false,
+                "positionClass":"toast-top-right",
+                "type":"info",
+                "timeOut":"5000",
+                "extendedTimeOut":"2000",
+                "allowHtml":false,
+                "closeButton":true,
+                "tapToDismiss":true,
+                "progressBar":true,
+                "newestOnTop":true,
+                "maxOpened":0,
+                "preventDuplicates":false,
+                "preventOpenDuplicates":false
+           });
+           return;
+        }
+        // $("#btnManualEntryKey").attr("disabled", "disabled");
+        $("#hiddenCode").attr("class", "form-group");
+        $.ajax({
+            type:"post",
+            url: "/Home/getManualEntryKey",
+            data: { account: account },
+            dataType:"json",
+            success: function (data) {
+                if (data.statu) {
+                    qrcode.makeCode(utf16to8(data.msg.QrCodeSetupImageUrl));
+                    $("#manualEntryKey").html("手动输入密钥：" + data.msg.ManualEntryKey);
+                    $("#accountSecretKey").val(data.msg.AccountSecretKey);
+                } else {
+                    toastr.error("该账号已被注册");
+                }
+            }
+        })
+    }
+
+    //注册
+    function register() {
+        var accountSecretKey = $("#accountSecretKey").val();
+        var inputCode = $("#inputCode").val();
+        var account = $("#Account").val();
+        var passWord = $("#passWord").val();
+        var passWord1 = $("#passWord1").val();
+        if (inputCode=="" || accountSecretKey == "") {
+            toastr.warning('请获取密钥并输入您的动态密码', '字段有误', {
+                "autoDismiss": false,
+                "positionClass": "toast-top-right",
+                "type": "info",
+                "timeOut": "5000",
+                "extendedTimeOut": "2000",
+                "allowHtml": false,
+                "closeButton": true,
+                "tapToDismiss": true,
+                "progressBar": true,
+                "newestOnTop": true,
+                "maxOpened": 0,
+                "preventDuplicates": false,
+                "preventOpenDuplicates": false
+            });
+            return;
+        }
+        if (passWord!=passWord1) {
+            toastr.warning('两次输入的密码不一致，请重新输入');
+            return;
+        }
+        $.ajax({
+            type: "post",
+            url: "/Home/register",
+            data: {
+                accountSecretKey: accountSecretKey,
+                inputCode: inputCode,
+                account: account,
+                passWord: passWord
+            },
+            dataType: "json",
+            success: function (data) {
+                if (data.statu) {
+                    toastr.info(data.msg);
+                } else {
+                    toastr.error(data.msg);
+                }
+            }
+        })
+    }
+
+    function utf16to8(str) {
+        var out, i, len, c;
+        out = "";
+        len = str.length;
+        for (i = 0; i < len; i++) {
+            c = str.charCodeAt(i);
+            if ((c >= 0x0001) && (c <= 0x007F)) {
+                out += str.charAt(i);
+            } else if (c > 0x07FF) {
+                out += String.fromCharCode(0xE0 | ((c >> 12) & 0x0F));
+                out += String.fromCharCode(0x80 | ((c >> 6) & 0x3F));
+                out += String.fromCharCode(0x80 | ((c >> 0) & 0x3F));
+            } else {
+                out += String.fromCharCode(0xC0 | ((c >> 6) & 0x1F));
+                out += String.fromCharCode(0x80 | ((c >> 0) & 0x3F));
+            }
+        }
+        return out;
+    }
+</script>
